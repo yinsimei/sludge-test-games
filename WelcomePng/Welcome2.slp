@@ -1,0 +1,28 @@
+[SETTINGS]
+windowname=Welcome to SLUDGE!
+finalfile=Welcome
+language=English
+datafolder=
+quitmessage=Sure you want to quit?
+customicon=
+customlogo=
+mouse=1
+fullscreen=N
+makesilent=N
+showlogo=Y
+showloading=Y
+invisible=N
+ditherimages=Y
+width=370
+height=170
+speed=40
+chrRender_def_enabled=Y
+chrRender_def_softX=4
+chrRender_def_softY=4
+chrRender_max_enabled=Y
+chrRender_max_readIni=Y
+chrRender_max_softX=100
+chrRender_max_softY=100
+
+[FILES]
+script.slu
