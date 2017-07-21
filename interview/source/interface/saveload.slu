@@ -1,0 +1,385 @@
+# Saving/Loading code
+
+var filesStart;
+var fileStrings = newStack();
+var fileSaveName = "";
+var saveOrLoad;
+var selectedSave;
+var fileStack;
+var gameStack;
+var numFiles;
+var q_result;
+
+sub setColour(i) {
+	if (i==2)
+		setBlankColour (102, 0, 153);		# Highlighted
+	else if (i==255)
+		setBlankColour(255, 255, 255);		# White
+	else
+		setBlankColour (0, 0, 0);			# Black
+}
+
+sub saveThisGame ( type ) {
+
+	saveOrLoad = type;
+
+	# Freeze the action.
+	menuActive = TRUE;
+	freeze();
+
+	addScreenRegion(xButton, 499, 71, 556, 132, 0, 0, -1);
+	positionStatus (0, 451);
+	addStatus();
+
+	darkBackground ();
+
+	addOverlay ('interface/menu.tga', CENTRE, 0);
+	addOverlay ('interface/ok.tga', 483, 338);
+	addOverlay ('interface/arrows.tga', 500, 153);
+
+	if (type == "save") {
+		addOverlay ('interface/save.tga', 60, 130);
+		addScreenRegion(buttonSave, 483, 338, 567, 403, 0,0,-1);
+	} else {
+		addOverlay ('interface/load.tga', 60, 130);
+		addScreenRegion(buttonLoad, 483, 338, 567, 403, 0,0,-1);
+	}
+
+	# Init a few vars
+	filesStart = 0;
+	fileSaveName = "";
+	selectedSave = 0;
+
+	gameStack = newStack(gameOne,gameTwo,gameThree,gameFour,gameFive,gameSix,gameSeven,gameEight);
+	bodgeFilenames(TRUE);
+	fileStack = copyStack(getMatchingFiles (".sav"));
+	bodgeFilenames(FALSE);
+	numFiles = (stackSize (fileStack));
+
+	if (type == "load" && ! numFiles) {
+		#pasteString(CENTRE, 100, "THERE ARE NO SAVED GAMES TO LOAD!");
+	} else {
+		if(type == "save") {
+			pushToStack(fileStack, "");
+			numFiles++;
+		}
+		addScreenRegion(scrollUp,   502, 156, 530, 192, 0,0,-1);
+		addScreenRegion(scrollDown, 501, 279, 528, 317, 0,0,-1);
+		
+		pasteFiles();
+		setTextString (fileStrings[0]);
+	}
+
+	saveGo ();
+}
+
+sub handleSLKeys (k) {
+	var y;
+
+	if (k == "ESCAPE") {
+		goBackToGame();
+	} else if (saveOrLoad == "save") {
+		if (stringLength (k) == 1 && stringLength (fileSaveName) < 20) {
+			fileSaveName = fileSaveName + k;
+		} else if (k == "ENTER") {
+			gameSaveNow();
+			return;
+		} else if (k == "BACKSPACE" && fileSaveName != "") {
+		fileSaveName = substring (fileSaveName, 0, stringLength (fileSaveName) - 1);
+		}
+
+		y = (selectedSave-filesStart) * 30;
+		
+		if (y < 0) {
+			filesStart = selectedSave;
+			pasteFiles();
+		} else {
+			setColour (2);
+			blankArea (177, y + 132, 484, y + 152);
+			pasteString (177, y + 146, fileSaveName + "_");
+		}
+	} else if (k == "DELETE") {
+		deleteFile (fileSaveName + ".sav");
+		fileSaveName = "";
+		bodgeFilenames(TRUE);
+		fileStack = copyStack(getMatchingFiles (".sav"));
+		bodgeFilenames(FALSE);
+		numFiles = (stackSize (fileStack));
+
+		if (! numFiles) {
+			setColour (0);
+			blankArea (177, 132, 484, 342);
+			#pasteString(CENTRE, 300, "THERE ARE NO SAVED GAMES TO LOAD!");
+		} else {
+			if (selectedSave>=numFiles) {
+				selectedSave = numFiles-1;
+			}
+			filesStart = selectedSave - 3;
+			pasteFiles();
+			setTextString (fileStrings[selectedSave-filesStart]);
+		}
+	}
+}
+
+sub saveGo () {
+	#Set up the mouse events.
+	busy = FALSE;
+	onKeyboard (handleSLKeys);
+	onLeftMouse (saveClick);
+	onRightMouse (saveRight);
+	onFocusChange (handleFocus);
+	handleFocus (getOverObject ());
+}
+
+sub saveRight () {
+}
+
+sub saveClick () {
+	var o = getOverObject ();
+	if (getOverObject ()) {
+		onLeftMouse ();
+		onKeyboard();
+		#arrowSleep();
+		busy = TRUE;
+		callEvent(exit, o);
+	}
+}
+
+sub goBackToGame () {
+	# This function just returns control back to the main game.
+	unfreeze ();
+	onKeyboard (keys);
+	menuActive = FALSE;
+}
+sub gameSaveNow () {
+	var result;
+	if(stringLength(fileSaveName) > 0){
+
+		bodgeFilenames(TRUE);
+		if (fileExists(fileSaveName + ".sav") || stringLength(fileStack[selectedSave]) > 0) {
+		if (question("This will overwrite a saved game...",
+		"are you sure you want to do this? (Y/N)") != 1) {
+
+				unfreeze ();
+				saveGo();
+				return;
+			}
+		}
+		unfreeze ();
+		
+		if(stringLength(fileStack[selectedSave]) > 0) {
+			deleteFile(fileStack[selectedSave]+".sav");
+		}
+		
+		# We need to unfreeze so we can save the game in it's current state.
+		goBackToGame();	
+		#pause(2);
+
+		#setThumbnailSize(160, 120);
+
+		# Remember that when we load the game we will start right here,
+		# NOT from where the load command is.
+		result = saveGame(fileSaveName + ".sav");
+		bodgeFilenames(FALSE);
+		
+		if (result == TRUE){
+			saveLoadMessage ("save");
+		} else {
+			saveLoadMessage ("load");
+		}
+	} else {
+		saveLoadMessage ("error1");
+		saveGo();
+	}
+
+}
+
+sub gameLoadNow () {
+	# Lets's load the selected game.
+	var result;
+	bodgeFilenames(TRUE);
+	if(stringLength(fileSaveName) > 0){
+		unfreeze();
+		loadGame(fileSaveName + ".sav");
+		# Now we continue in the save function and not here!
+	} else {
+		saveLoadMessage ("error2");
+		saveGo();
+	}
+	bodgeFilenames(FALSE);	
+}
+
+sub saveLoadMessage (x) {
+	freeze ();
+	darkBackground ();
+	setPasteColour (255, 255, 255);
+	if (x == "save") {
+		pasteString (CENTRE, 240, "Game Saved!");
+	} else if (x == "load") {
+		pasteString (CENTRE, 240, "Game Loaded!");
+	} else if (x == "error1") {
+		pasteString (CENTRE, 240, "The saved game needs a name, silly.");
+	} else if (x == "error2") {
+		pasteString (CENTRE, 240, "You didn't select a game to load! Tisk, tisk.");
+	}
+	pause(30);
+	unfreeze();
+}
+
+sub pasteFiles () {
+	# Here we go and collect all the current save games. Since space in the
+	# main window is limited, we will only display 8 games at a time. Which
+	# 8 games to show is determined by the fileStart variable.
+
+	var start, stop, y;
+
+	y = 0;
+	if (filesStart < 0) filesStart = 0;
+	if (filesStart >= numFiles) filesStart = numFiles-1;
+
+	start = filesStart;
+	stop = start + 7;
+	if (stop > numFiles) stop = numFiles;
+
+	setPasteColour (255, 255, 255);
+	setColour (0);
+	blankArea (177, 132, 484, 342);
+	var j = 0;
+	var tempStrings = newStack();
+	for (var i = start; i < stop; i ++) {
+		if (i == selectedSave) {
+			setColour (2);
+			blankArea (177, y + 132, 484, y + 152);
+			if (saveOrLoad == "save")
+				pasteString (177, y + 146, fileSaveName + "_");
+			else
+				pasteString (177, y + 146, fileSaveName);
+		} else {
+			setColour (1);
+			blankArea (177, y + 132, 484, y + 152);
+			pasteString (177, y + 146, fileStack[i]);
+		}
+
+		addScreenRegion(gameStack[j], 177, y + 132, 484, y + 152, 0,0,-1);  
+		pushToStack (tempStrings, fileStack[i]);
+		y += 30;
+		j++;
+	}
+	if (j<7) removeScreenRegion(gameStack[j]);
+	# flip the order of the stack
+	fileStrings = copyStack(tempStrings);
+}
+
+
+sub setTextString( string )
+{
+	fileSaveName = string;
+	pasteFiles();
+
+	if (saveOrLoad == "load") {
+		bodgeFilenames(TRUE);
+		if(stringLength(fileSaveName) > 0){
+			showThumbnail (fileSaveName + ".sav", 250, 340);
+		}
+		bodgeFilenames(FALSE);
+	}
+}
+
+objectType exit("") {}
+
+
+#These are the clickable objects. I made them like this so I
+#could add addition functionality later on.
+objectType scrollUp ("Scroll Up"){
+	event exit {
+		filesStart--;
+		pasteFiles();
+		saveGo();
+	}
+}
+objectType scrollDown ("Scroll Down"){
+	event exit {
+		filesStart++;
+		pasteFiles();
+		saveGo();
+	}
+}
+objectType buttonSave ("Save this game"){
+	event exit {
+		gameSaveNow();
+	}
+}
+objectType buttonLoad ("Load this game"){
+	event exit {
+		gameLoadNow();
+	}
+}
+objectType buttonYes ("Answer Yes!"){
+	event exit {
+		q_result = 1;
+	}
+}
+objectType buttonNo ("Answer No!"){
+	event exit {
+		q_result = 2;
+	}
+}
+
+# These are the visible 8 game slot objects.
+objectType gameOne (""){
+	event exit {
+		selectedSave=0 + filesStart;
+		setTextString (fileStrings[0]);
+		saveGo();
+	}
+}
+objectType gameTwo (""){
+	event exit {
+		selectedSave=1 + filesStart;
+		setTextString (fileStrings[1]);
+		saveGo();
+	}
+}
+objectType gameThree (""){
+	event exit {
+		selectedSave=2 + filesStart;
+		setTextString (fileStrings[2]);
+		saveGo();
+	}
+}
+objectType gameFour (""){
+	event exit {
+		selectedSave=3 + filesStart;
+		setTextString (fileStrings[3]);
+		saveGo();
+	}
+}
+objectType gameFive (""){
+	event exit {
+		selectedSave=4 + filesStart;
+		setTextString (fileStrings[4]);
+		saveGo();
+	}
+}
+objectType gameSix (""){
+	event exit {
+		selectedSave=5 + filesStart;
+		setTextString (fileStrings[5]);
+		saveGo();
+	}
+}
+objectType gameSeven (""){
+	event exit {
+		selectedSave=6 + filesStart;
+		setTextString (fileStrings[6]);
+		saveGo();
+	}
+}
+objectType gameEight (""){
+	event exit {
+		selectedSave=7 + filesStart;
+		setTextString (fileStrings[7]);
+		saveGo();
+	}
+}
+

@@ -1,0 +1,5 @@
+﻿;!@Install@!UTF-8!
+Title="Mandy Christmas Adventure (with greeting)"
+BeginPrompt="Do you want to install Mandy Christmas Adventure?"
+RunProgram="MandyInstall.exe /T:%%T"
+;!@InstallEnd@!

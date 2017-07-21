@@ -1,0 +1,121 @@
+sub credits () {
+	setColour(1);
+	blankScreen ();
+	pause (10);
+
+	fadeCredit ("The End");
+	fadeCredit ("(for now, at least)");
+
+	setPasteColour (255, 255, 255);
+	addToCredits ("Written and directed by");
+	gapInCredits (10);
+	addToCredits ("Deirdra Kiai");
+	gapInCredits (100);
+	
+	addToCredits ("Programming by");
+	gapInCredits (10);
+	addToCredits ("Deirdra Kiai");
+	gapInCredits (100);
+	
+	addToCredits ("Graphics and animation by");
+	gapInCredits (10);
+	addToCredits ("Deirdra Kiai");
+	gapInCredits (100);
+	
+	addToCredits ("Music by");
+	gapInCredits (10);
+	addToCredits ("Deirdra Kiai");
+	gapInCredits (100);
+	
+	addToCredits ("SLUDGE engine by");
+	gapInCredits (10);
+	addToCredits ("Tim Furnish");
+	addToCredits ("(finally, someone who isn't Deirdra Kiai!)");
+	gapInCredits (100);
+	
+	addToCredits ("Additional interface coding by");
+	gapInCredits (10);
+	addToCredits ("Rikard Peterson");
+	gapInCredits (100);
+	
+	addToCredits ("The sound effects were stolen, as usual.");
+	gapInCredits (100);
+	
+	addToCredits ("No characters were psychologically harmed");
+	addToCredits ("from seeing a Big Bad Woolf in a dress.");
+
+	gapInCredits (480);
+
+	fadeCredits ("Be sure to stay tuned for", "\"The Game that takes Place on a Cruise Ship\"");
+	fadeCredit ("Coming... sometime. When you least expect it.");
+
+	quitGame ();
+}
+
+#---------------------------------------------------------------------------------
+# All the workings...
+#---------------------------------------------------------------------------------
+
+var SPEEDOFCREDITS = 2;
+
+sub fadeCredits (thisText, thisText2) {
+	var a;
+	for (a = 5; a <= 255; a += 25) {
+		setPasteColour (a, a, a);
+		pasteString (CENTRE, 230, thisText);
+		pasteString (CENTRE, 270, thisText2);
+		pause (1);
+	}
+	pause (30);
+	for (a = 230; a >= 5; a -= 25) {
+		setPasteColour (a, a, a);
+		pasteString (CENTRE, 230, thisText);
+		pasteString (CENTRE, 270, thisText2);
+		pause (1);
+	}
+	blankScreen ();
+	pause (10);
+}
+
+sub fadeCredit (thisText) {
+	var a;
+	for (a = 5; a <= 255; a += 25) {
+		setPasteColour (a, a, a);
+		pasteString (CENTRE, 250, thisText);
+		pause (1);
+	}
+	pause (30);
+	for (a = 230; a >= 5; a -= 25) {
+		setPasteColour (a, a, a);
+		pasteString (CENTRE, 250, thisText);
+		pause (1);
+	}
+	blankScreen ();
+	pause (10);
+}
+
+sub addToCredits (thisText) {
+	for (var a = 0; a < 32; a += SPEEDOFCREDITS) {
+		hardScroll (SPEEDOFCREDITS);
+		pasteString (CENTRE, 500 - a, thisText);
+		pause (1);
+	}
+}
+
+sub addSpecialCredits (thisText, thisText2) {
+	for (var a = 0; a < 32; a += SPEEDOFCREDITS) {
+		hardScroll (SPEEDOFCREDITS);
+		setPasteColour (200, 200, 255);
+		pasteString (30, 500 - a, thisText);
+		setPasteColour (255, 200, 100);
+		pasteString (610 - stringWidth (thisText2), 500 - a, thisText2);
+		pause (1);
+	}
+}
+
+sub gapInCredits (thisMany) {
+	for (var a = 0; a < thisMany; a += SPEEDOFCREDITS) {
+		hardScroll (SPEEDOFCREDITS);
+		pause (1);
+	}
+}

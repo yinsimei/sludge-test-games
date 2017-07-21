@@ -1,0 +1,103 @@
+var menuActive=FALSE;
+
+# Display the menu
+sub menu () {
+	transitionLevel (256);
+	freeze ();
+	darkBackground ();
+	addOverlay ('interface/menu.tga', CENTRE, 0);
+	addOverlay ('interface/load.tga', 60, 130);
+	addOverlay ('interface/save.tga', 60, 198);
+	addOverlay ('interface/quit.tga', 60, 256);
+	addScreenRegion(xButton, 499, 71, 556, 132, 0, 0, -1);
+	addScreenRegion(loadButton, 69,137, 150,182, 0, 0, -1);
+	addScreenRegion(saveButton, 68,197, 153,243, 0, 0, -1);
+	addScreenRegion(quitButton, 68,257, 149,300, 0, 0, -1);
+	onKeyboard (menuKeys);
+	positionStatus (0, 451);
+	addStatus();
+	menuActive = TRUE;
+	menuGo ();
+}
+
+sub exitMenu() {
+	positionStatus (0, 341);
+	unfreeze ();
+	onKeyboard (keys);
+	menuActive = FALSE;
+}
+
+sub menuKeys (k) {
+	if (k == "ESCAPE") exitMenu();
+}
+
+objectType xButton ("Return to the game") {
+	event exit {
+		goBackToGame();		
+	}
+}
+
+objectType loadButton ("Load a saved game") {}
+
+objectType saveButton ("Save the current game") {}
+
+objectType optionsButton ("Options") {}
+
+objectType quitButton ("Quit the game") {}
+
+sub menuGo () {
+	busy = FALSE;
+	onLeftMouse (menuClick);
+	onRightMouse ();
+	onFocusChange (handleFocus);
+	handleFocus (getOverObject ());
+}
+
+sub menuClick () {
+	var o = getOverObject ();
+	if (o == xButton) {
+		exitMenu();
+	} else if (o == loadButton) {
+		unfreeze();
+		saveThisGame ("load");
+	} else if (o == saveButton) {
+		unfreeze();
+		saveThisGame ("save");
+	} else if (o == quitButton) {
+		unfreeze ();
+		quitThisGame ();
+	}
+}
+
+sub quitThisGame () {
+	if (question("Parting is such sweet sorrow,",
+	"but are you sure? (Y/N)") == 1) 
+		quitGame();
+		
+	exitMenu();
+}
+
+
+var finishedQuestion = 1;
+
+# Used to ask for confirmation
+# when quitting the game or overwriting a saved game
+sub question (text1, text2) {
+	finishedQuestion = 0;
+	freeze ();
+	
+	darkBackground ();
+	setColour (0);
+	setPasteColour (255, 255, 255);
+	pasteString (CENTRE, 220, text1);
+	pasteString (CENTRE, 250, text2);
+	
+	onKeyboard (handleQuestionKeys);
+	while (! finishedQuestion) pause (1);
+	return finishedQuestion;
+}
+
+sub handleQuestionKeys (k) {
+	if (k == "y") finishedQuestion = 1;
+	if (k == "n") finishedQuestion = 2;
+}

@@ -1,0 +1,136 @@
+sub employmentRoom () {
+	loopSound ('noise/jazzy.ogg');
+	addOverlay ('employment/room.tga', 0, 0);
+	setFloor ('employment/room.flo');
+	setZBuffer ('employment/room.zbu');
+	setScale (75, 250);
+
+	addCharacter (employmentDoor, 519,124, costume (anim ('employment/doors.duc', 0), NULL, NULL));
+	setCharacterExtra (employmentDoor, FIXEDSIZE);
+
+	var k = anim ('employment/katz.duc', 0);
+	var kT = anim ('employment/katz.duc', 0, 1, 2, 1, 0, 3, 4, 3);
+	addCharacter (katz, 202,245, costume (k,k,kT));
+
+	if (lastRoom == testRoom) {
+		addCharacter (ego, 407,183, makeEgoAnim ());
+		forceCharacter (ego, 407,224);
+		addCharacter (employmentDoor2, 354, 86, costume (anim ('employment/doors.duc', 10), NULL, NULL));
+		setCharacterExtra (employmentDoor2, FIXEDSIZE);
+		playSound ('noise/bigdoor.wav');
+		pause (animate (employmentDoor2, anim ('employment/doors.duc', 9,8,7,6,5,4,3)));
+		setCostume (employmentDoor2, costume (anim ('employment/doors.duc', 2), NULL, NULL));
+		callEvent (walkToPerson, katz);
+		pause (10);
+		say (katz, "Brilliant! That was just brilliant!");
+		say (katz, "You're definitely the kind of person who'd star in an amateur adventure game!");
+		say (ego, "So I'm hired?");
+		say (katz, "But of course!");
+		think (ego, "Well, then, this is probably the happiest day of my life.");
+		think (ego, "Except maybe for that time I found a potato chip that looked like Michael Jackson.");
+		think (ego, "Oh well.");
+		gotoRoom (credits);
+	} else {
+		addCharacter (employmentDoor2, 354, 86, costume (anim ('employment/doors.duc', 2), NULL, NULL));
+		setCharacterExtra (employmentDoor2, FIXEDSIZE);
+		addCharacter (ego, 640,255, makeEgoAnim ());
+		cutscene (interviewCS, interviewCSStop);
+	}
+}
+
+sub interviewCS () {
+	fadeIn ();
+	pause (15);
+	animate (employmentDoor, anim ('employment/doors.duc', 1));
+	playSound ('noise/dooropen.wav');
+	moveCharacter (ego, 450, 257);
+	animate (employmentDoor, anim ('employment/doors.duc', 0));
+	playSound ('noise/doorclose.wav');
+	pause (10);
+	callEvent (walkToPerson, katz);
+
+	say (ego, "Er... hello there.");
+	say (ego, "My name is Gertrude Zzyrgenhymer,");
+	say (ego, "and I'd like to apply for a position as a computer game character.");
+	say (katz, "Oh, really?");
+	say (katz, "Well, my name is Mallory H. Katz,");
+	say (katz, "and I handle all the employment positions in this agency.");
+	say (ego, "Wonderful.");
+	say (katz, "And I must say, you're in luck.");
+	say (katz, "Female game characters ARE becoming increasingly more popular nowadays.");
+	say (katz, "However, they usually do seem a bit more...");
+	say (katz, "...curvaceous than you are.");
+	say (katz, "Do you think you'd be willing to have plastic surgery?");
+	say (ego, "Of course not. I'm not that desperate.");
+	say (katz, "What a pity. You'd definitely sell more games that way.");
+	pause (10);
+	say (katz, "Anyway... er... what was your name again?");
+	say (ego, "Gertrude Zzyrgenhymer.");
+	say (katz, "You'll have to change it.");
+	say (ego, "Change it?");
+	say (katz, "Yes, to something shorter and more seductive.");
+	say (katz, "Like \"Laura Fox\", or \"Meg Scarlet\".");
+	say (katz, "Even \"Andromeda Rodriguez\" would be acceptable in some circumstances.");
+	say (katz, "But a name as unpronounceable as yours... forget it.");
+	think (ego, "*sigh* This is going to be harder than I thought.");
+	pause (10);
+	say (katz, "Now then, Miss Zarghammer...");
+	say (ego, "Zzyrgenhymer.");
+	say (katz, "Whatever. Do you have any special talents?");
+	say (ego, "I've got a Bachelor's degree in rhymatology.");
+	say (katz, "Oh. So you write poetry?");
+	say (ego, "No, I meticulously analyze it.");
+	say (katz, "Well, I must say, that is the most useless degree I've ever heard of.");
+	say (katz, "What I meant by \"talents\", Miss Zurg-whatever,");
+	say (katz, "were things that would actually be of use in a computer game setting,");
+	say (katz, "such as martial arts skills, or the ability to hold your breath for ten minutes.");
+	say (katz, "Have you ever operated a deadly weapon before?");
+	say (ego, "No I haven't. In fact, I believe that it's morally wrong to kill.");
+	think (ego, "But in your case, I'm strongly considering making an exception.");
+	say (katz, "Okay, hmm, let's see...");
+	pause (10);
+	say (katz, "Well, that just about excludes you from every job we have available...");
+	say (katz, "...except wait. There seems to be a position available in an amateur adventure game.");
+	say (katz, "It seems as though Deedra Cahier... er... Deirdre Kai... er...");
+	say (katz, "Deirdra Kiai Productions,");
+	say (katz, "(what IS it with people and their unpronounceable names?!)");
+	say (katz, "famous for its cult classic, \"Cubert Badbone, P.I.\",");
+	say (katz, "is searching for a main character in what is tentatively called");
+	think (katz, "*dramatic pause for effect*");
+	say (katz, "\"The Game that takes Place on a Cruise Ship\".");
+	say (katz, "However, it takes a special person to be able to star in an adventure game.");
+	pause (10);
+	say (katz, "A VERY special person.");
+	say (ego, "Lovely. What do I have to do?");
+	say (katz, "Well, I will be transporting you to one of our special testing rooms.");
+	say (katz, "Once you are there, you will have to get past a fearsome monster,");
+	say (katz, "all while using your wits and whatever objects happen to be available.");
+	say (ego, "Sounds wonderful. When do I start?");
+	say (katz, "Right now.");
+	fadeOut ();
+}
+
+sub interviewCSStop () {
+	freeze ();
+	addOverlay ('title.tga', 0, 0);
+	fadeIn ();
+	pause (30);
+	fadeOut ();
+	unfreeze ();
+	stopSound ('noise/jazzy.ogg');
+	gotoRoom (testRoom);
+}
+
+objectType katz ("interviewer") {
+	speechColour 255, 0, 255;
+	event walkToPerson {
+		moveCharacter (ego, 264, 250);
+		turnCharacter (ego, WEST);
+	}
+}
+
+objectType employmentDoor ("") {
+}
+
+objectType employmentDoor2 ("") {
+}

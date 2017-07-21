@@ -1,0 +1,5 @@
+﻿;!@Install@!UTF-8!
+Title="Mandy Vianočná adventúra (s pozdravom)"
+BeginPrompt="Chcete nainštalovať Mandy Vianočnú adventúru?"
+RunProgram="MandyInstall.exe /T:%%T"
+;!@InstallEnd@!

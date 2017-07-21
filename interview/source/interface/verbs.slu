@@ -1,0 +1,84 @@
+objectType select ("") {
+}
+
+objectType default ("") {
+}
+
+objectType oneAction ("") {
+}
+
+objectType walkToPerson ("") {
+}
+
+objectType verbWalkTo ("") {
+	event select {
+		verbText = "Walk To";
+	}
+	event default {
+	}
+}
+
+objectType verbExamine ("") {
+	event select {
+		verbText = "Examine";
+	}
+	event default {
+		think (ego, "Just a boring piece of scenery.");
+	}
+}
+
+objectType verbPickUp ("") {
+	event select {
+		verbText = "Pick Up";
+	}
+	event default {
+		if (callEvent (getIcon, object)) {
+			think (ego, "I've already got it. Duh.");
+		} else {
+			think (ego, "I don't want it.");
+		}
+	}
+}
+
+objectType verbTalkTo ("") {
+	event select {
+		verbText = "Talk To";
+	}
+	event default {
+		say (ego, "Er... hello there.");
+		pause (16);
+		think (ego, "It's not talking back to me. That means I haven't gone insane yet.");
+	}
+}
+
+objectType verbSmell ("") {
+	event select {
+		verbText = "Smell";
+	}
+	event default {
+		defaultSmell ();
+		think (ego, "Nope, that doesn't smell like anything.");
+	}
+}
+
+sub defaultSmell () {
+	think (ego, "*sniff sniff*", 'noise/sniff.wav');
+}
+
+objectType verbUse ("") {
+	event select {
+		verbText = "Use";
+	}
+	event default {
+		think (ego, "I'm not creative enough to use that for anything.");
+	}
+}
+
+objectType verbConsume ("") {
+	event select {
+		verbText = "Consume";
+	}
+	event default {
+		think (ego, "I don't believe that'll go down my digestive tract.");
+	}
+}

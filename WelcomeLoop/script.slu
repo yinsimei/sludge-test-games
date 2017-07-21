@@ -1,6 +1,0 @@
-sub init () {
-	addOverlay ('image.tga', 0, 0);
-	loopSound ('tada.ogg', 'pop.wav', );
-	pause (60);
-	quitGame ();
-}

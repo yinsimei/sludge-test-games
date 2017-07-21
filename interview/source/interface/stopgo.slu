@@ -1,0 +1,95 @@
+var busy = TRUE;
+
+sub go () {
+	onLeftMouse (leftClick);
+	onRightMouse (rightClick);
+	busy = FALSE;
+	onFocusChange (handleFocus);
+
+	# We haven't been updating, so let's do this ourselves
+	handleFocus (getOverObject ());
+}
+
+sub stop () {
+	onFocusChange ();
+	statusText ("");
+	onLeftMouse ();
+	onRightMouse (skipper);
+	setCursor (anim ('interface/mouse.duc', 1));
+	busy = TRUE;
+}
+
+sub skipper () {
+	skipSpeech ();
+}
+
+sub handleFocus (o) {
+	if (o) {
+		setCursor (anim ('interface/mouse.duc', 2));
+		overObject = getOverObject ();
+	} else {
+		setCursor (anim ('interface/mouse.duc', 0));
+		overObject = NULL;
+	}
+	drawStatusLine ();
+}
+
+sub drawStatusLine () {
+	if (menuActive) {
+		statusText(overObject ? overObject : "");
+	} else {
+		if (! busy) {
+			if (overObject) {
+				if (overObject + "" != "") {
+					if (getMouseY () > 320 && action == verbWalkTo) {
+						# This is here because "walking to" an inventory
+						# item wouldn't make any sense, now would it?
+						statusText (overObject);
+					} else {
+						statusText (verbText + " " + overObject);
+					}
+					return;
+				}
+			}
+		}	
+		statusText (verbText);
+	}
+}
+
+sub doEvent (a, b) {
+	if (a != b) {
+		if (! callEvent (a, b)) {
+			if (! callEvent (b, a)) {
+				if (! callEvent (default, a)) {
+					think (ego, "I would if I could, but I can't, so I won't.");
+				}
+			}
+		}
+	}
+}
+
+var currentRoom = NULL;
+var lastRoom = NULL;
+
+sub gotoRoom (r) {
+	# Get rid of all the object types
+	removeAllCharacters ();
+	removeAllScreenRegions ();
+
+	setSD (640);
+
+	# Get rid of the floor and z-buffer, in case the new room forgets to load any
+	setFloor (NULL);
+	setZBuffer (NULL);
+	
+	# Finish any running timers we might have on the go
+	completeTimers ();
+
+	# Fix the variables lastRoom and currentRoom
+	# (We don't NEED them, but they are useful in scripts)
+	lastRoom = currentRoom;
+	currentRoom = r;
+
+	# Now, finally call the function to build the new room
+	r ();
+}

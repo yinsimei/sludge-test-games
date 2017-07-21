@@ -1,0 +1,22 @@
+Mandy Christmas Adventure 1.4
+
+Copyright © 2003-2006 Rudolf Slavka, Marian Mifkovic.
+
+This game is FREEWARE, you can copy and share it free, but you must not make profit from it.
+
+This software is provided 'as-is', without any express or implied warranty. In no event will the authors be held liable for any damages arising from the use of this software. Authors are not responsible for the content of users' greetings.
+
+If you want to publish this game on your website, you must provide us with the number of downloads.
+
+You can put this game on CD/DVD of your PC or Game magazine only if you send us a copy of your magazine together with the CD/DVD.
+
+Contact us for more info:
+games@aquindesign.com
+www.aquindesign.com
+
+SLUDGE - Copyright © 2000-2002 Hungry Software
+7-Zip - Copyright © 1999-2003 Igor Pavlov
+NSIS - Copyright © 1999-2003 Nullsoft, Inc.
+BASS - Copyright © 1999-2005 Un4seen Developments
+
+[23.10.2006]

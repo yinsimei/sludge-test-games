@@ -1,0 +1,27 @@
+# The main character. If you don't want to be able to perform actions on
+# this character, change the name to the empty string ("").
+objectType ego ("") {
+	speechColour 255, 255, 255;
+}
+
+# This function returns the ego's standard costume - which beats including it in
+# every room definition
+sub makeEgoAnim () {
+	return costume (
+		# STANDING STILL...
+		anim ('ego/gert.duc', 0),
+		anim ('ego/gert.duc', -2),
+		anim ('ego/gert.duc', 1),
+		anim ('ego/gert.duc', 2),
+		# WALKING...
+		anim ('ego/gert.duc', 3,4,5,6,7,8,9,10,11,12,13,14),
+		anim ('ego/gert.duc', -27,-28,-29,-30,-31,-32,-33,-34,-35,-36,-37,-38),
+		anim ('ego/gert.duc', 15,16,17,18,19,20,21,22,23,24,25,26),
+		anim ('ego/gert.duc', 27,28,29,30,31,32,33,34,35,36,37,38),
+		# TALKING...
+		anim ('ego/gert.duc', 0,39,40,39,0,41,42,41),
+		anim ('ego/gert.duc', -2,-43,-44,-43,-2,-45,-46,-45),
+		anim ('ego/gert.duc', 1),
+		anim ('ego/gert.duc', 2,43,44,43,2,45,46,45)
+	)
+}

@@ -1,0 +1,127 @@
+var overObject = NULL;
+var object;
+var action;
+var verbText;
+
+objectType interface ("") {
+}
+
+objectType interface1 ("") {
+}
+
+# Show the interface at the bottom
+sub showInterface () {
+	showInventory ();
+
+	addCharacter (interface1, 0, 351, anim ('interface/interface.duc', 1));
+	setCharacterExtra (interface1, ICON);
+	setCharacterAntiAliasing (interface1, FALSE, 0, 0);
+	addCharacter (interface, 0, 351, anim ('interface/interface.duc', 0));
+	setCharacterExtra (interface, ICON);
+	setCharacterAntiAliasing (interface, FALSE, 0, 0);
+
+	addScreenRegion (verbExamine, 5+offset, 360, 115+offset, 405, 0, 0, -1);
+	addScreenRegion (verbPickUp, 123+offset, 360, 233+offset, 405, 0, 0, -1);
+	addScreenRegion (verbTalkTo, 241+offset, 360, 351+offset, 405, 0, 0, -1);
+	addScreenRegion (verbSmell, 5+offset, 419, 115+offset, 464, 0, 0, -1);
+	addScreenRegion (verbUse, 123+offset, 419, 233+offset, 464, 0, 0, -1);
+	addScreenRegion (verbConsume, 241+offset, 419, 351+offset, 464, 0, 0, -1);
+}
+
+# Show only the screen regions - for scrolling scenes
+sub showInterfaceSR () {
+	addScreenRegion (verbExamine, 5+offset, 360, 115+offset, 405, 0, 0, -1);
+	addScreenRegion (verbPickUp, 123+offset, 360, 233+offset, 405, 0, 0, -1);
+	addScreenRegion (verbTalkTo, 241+offset, 360, 351+offset, 405, 0, 0, -1);
+	addScreenRegion (verbSmell, 5+offset, 419, 115+offset, 464, 0, 0, -1);
+	addScreenRegion (verbUse, 123+offset, 419, 233+offset, 464, 0, 0, -1);
+	addScreenRegion (verbConsume, 241+offset, 419, 351+offset, 464, 0, 0, -1);
+	if (invUp == TRUE) {
+		addScreenRegion (upArrow, 372+offset, 365, 388+offset, 399, 0, 0, -1);
+	}
+	if (invDown == TRUE) {
+		addScreenRegion (downArrow, 372+offset, 425, 388+offset, 459, 0, 0, -1);
+	}
+}
+
+# Hide the interface
+sub hideInterface () {
+	hideInventory ();
+
+	removeCharacter (interface1);
+	removeCharacter (interface);
+
+	removeScreenRegion (verbExamine);
+	removeScreenRegion (verbPickUp);
+	removeScreenRegion (verbTalkTo);
+	removeScreenRegion (verbSmell);
+	removeScreenRegion (verbUse);
+	removeScreenRegion (verbConsume);
+}
+
+#Hide only the screen regions - again, for scrolling scenes
+sub hideInterfaceSR () {
+	removeScreenRegion (verbExamine);
+	removeScreenRegion (verbPickUp);
+	removeScreenRegion (verbTalkTo);
+	removeScreenRegion (verbSmell);
+	removeScreenRegion (verbUse);
+	removeScreenRegion (verbConsume);
+
+	removeScreenRegion (upArrow);
+	removeScreenRegion (downArrow);
+}
+
+# Change the current verb
+sub pickAction (ac) {
+	callEvent (select, ac);
+	action = ac;
+	drawStatusLine ();
+}
+
+sub leftClick () {
+	stopCharacter (ego);
+	# Did we click on an object?
+	if (overObject) {
+		# If it's a verb, and has a select event, change the current verb
+		if (callEvent (select, overObject)) {
+			pickAction (overObject);
+		# If it's an object you simply click on, then just call up the event
+		} else if (callEvent (oneAction, overObject)) {
+		} else {
+			# Use an inventory item with another object...
+			if (callEvent (getIcon, overObject) && action == verbUse) {
+				action = overObject;
+				verbText = "Use " + overObject + " with";
+				drawStatusLine ();
+				return;
+			}
+			# In any other case, just call up the appropriate event
+			object = overObject;
+			spawnSub (startBuddyMove);
+			if (! callEvent (walkToPerson, overObject)) {
+				moveCharacter (ego, overObject);
+			}
+			cancelSub (startBuddyMove);
+			stop ();
+			if (getMouseY () <= 320) buddyMove ();
+			doEvent (action, object);
+			pickAction (verbWalkTo);
+			go ();
+		}
+	# If we're over the interface screen, move the character to where we clicked
+	} else if (getMouseY () <= 320) {
+		pickAction (verbWalkTo);
+		spawnSub (startBuddyMove);
+		moveCharacter (ego, getMouseX (), getMouseY ());
+		cancelSub (startBuddyMove);
+		buddyMove ();
+	}
+}
+
+sub rightClick () {
+	# Right-clicking deselects the active verb, and brings it to the default "Walk To"
+	if (action != verbWalkTo) {
+		pickAction (verbWalkTo);
+	}
+}

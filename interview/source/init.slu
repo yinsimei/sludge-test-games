@@ -1,0 +1,26 @@
+sub init () {
+	setFont ('font.duc', "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?.,;:-*'\"~()/_ ", 32);
+	onKeyboard (keys);
+	setSpeechMode (SOUNDANDTEXT);
+	
+	# Display the DKP logo
+	addOverlay ('dkp.tga', 0, 0);
+	setPasteColour (255, 255, 255);
+	pasteString (CENTRE, 350, "proudly presents");
+	fadeIn ();
+	pause (30);
+	fadeOut ();
+
+	# Put the status bar in its appropriate position
+	addStatus ();
+	alignStatus (CENTRE);
+	positionStatus (0, 341);
+
+	# Start with the default "Walk To" verb
+	pickAction (verbWalkTo);
+
+	spawnSub (scroll);
+	stop ();
+	gotoRoom (employmentRoom);
+	go ();
+}

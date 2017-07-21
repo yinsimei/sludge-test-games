@@ -1,0 +1,422 @@
+sub testRoom () {
+	loopSound ('noise/elevator.ogg');
+	setSD (1032);
+	addOverlay ('test/room.tga', 0, 0);
+	setFloor ('test/room.flo');
+	setZBuffer ('test/room.zbu');
+	setScale (125,250);
+	
+	addCharacter (testDoor, 909,149, costume (anim ('test/doors.duc', 0), NULL, NULL));
+	setCharacterExtra (testDoor, FIXEDSIZE);
+	
+	addScreenRegion (speaker, 670,11, 719,31, 695,300, NORTH);
+	
+	addScreenRegion (painting, 468,80, 566,207, 519,293, NORTH);
+	
+	var w = anim ('test/woolf.duc', 0);
+	var wT = anim ('test/woolf.duc', 0, 1, 2, 3, 2, 1);
+	addCharacter (woolf, 876,302, costume (w,w,wT));
+	
+	addCharacter (books, 133,223, costume (anim ('test/stuff.duc', 0), NULL, NULL));
+	setCharacterExtra (books, FIXEDSIZE);
+	addCharacter (sausage, 189,227, costume (anim ('test/stuff.duc', 1), NULL, NULL));
+	setCharacterExtra (sausage, FIXEDSIZE);
+	addCharacter (lazer, 244,218, costume (anim ('test/stuff.duc', 2), NULL, NULL));
+	setCharacterExtra (lazer, FIXEDSIZE);
+	
+	addCharacter (ego, 695,300, makeEgoAnim ());
+	
+	fadeIn ();
+	cutscene (testCS, testCSStop);
+}
+
+sub testCS () {
+	pause (15);
+	say (ego, "Well, this is lovely.");
+	say (ego, "Now, where's that fearsome monster you were telling me about?");
+	say (speaker, "Er... on your left.");
+	turnCharacter (ego, EAST);
+	pause (10);
+	turnCharacter (ego, SOUTH);
+	pause (10);
+	say (ego, "That thing wearing a frilly pink dress?");
+	say (ego, "You call that a monster?!");
+	say (speaker, "That's the Big Bad Woolf,");
+	say (speaker, "and let me assure you, he's much more threatening than he seems.");
+	say (speaker, "Your task is to get past the door he's guarding.");
+	say (speaker, "On your right are some objects that may or may not help you do so.");
+	say (speaker, "Any questions?");
+	say (ego, "Yes. Is it possible for you to turn off that elevator music?");
+	say (ego, "It's giving me a false sense of security.");
+	say (speaker, "Well, I suppose this is something you'll have to get used to.");
+	say (speaker, "Many adventure games do have a lot of ambient background music, after all.");
+	say (ego, "Right.");
+}
+
+sub testCSStop () {
+	say (speaker, "Oh, and before I forget, there's a brand spanking new feature in this interview.");
+	say (speaker, "You now have the option of either being tested all by yourself,");
+	say (speaker, "or with the help of a buddy character who will follow you around everywhere.");
+	say (speaker, "What'll it be?");
+	loop {
+		addSpeechChoice ("I think I'll go with the buddy character.", 0);
+		addSpeechChoice ("I want to solve this all by myself.", 1);
+		
+		var reply = getSpeechChoice (ego);
+		if (reply == 0) {
+			say (speaker, "All right. The buddy character it is!");
+			pause (10);
+			addCharacter (buddy, 600, 300, makeBuddyAnim ());
+			pause (10);
+			turnCharacter (ego, WEST);
+			pause (10);
+			say (buddy, "Hi, I'm Prince Bolton of Nanonesia!");
+			say (ego, "Nice to meet you. I'm Gert.");
+			turnCharacter (ego, SOUTH);
+			pause (10);
+			buddyActivate = TRUE;
+			say (speaker, "Well, don't dilly-dawdle! Get busy!");
+			showInterface ();
+			return;
+		} else if (reply == 1) {
+			say (speaker, "Oh, you sure are quite the daredevil, aren't you?");
+			say (speaker, "Well, don't dilly-dawdle! Get busy!");
+			showInterface ();
+			return;
+		}
+	}
+}
+
+objectType speaker ("speaker") {
+	speechColour 255, 0, 255;
+	event verbExamine {
+		think (ego, "I believe that's where that dreadful music is coming from.");
+	}
+	event verbTalkTo {
+		say (ego, "Er... excuse me?");
+		say (speaker, "Didn't I tell you to stop dilly-dawdling and get busy?!");
+		say (ego, "Right. Sorry.");
+	}
+	event itemLazer {
+		say (speaker, "Don't even THINK about shooting this speaker!");
+	}
+	event itemPoetryBook {
+		say (ego, "\"Shall I compare thee to...\"");
+		say (speaker, "No.");
+	}
+}
+
+var woolfCounter = 0;
+var woolfCounter1 = 0;
+var woolfCounter2 = 0;
+var woolfCounter3 = 0;
+
+objectType woolf ("Big Bad Woolf") {
+	speechColour 204, 204, 204;
+	event walkToPerson {
+		moveCharacter (ego, 758,302);
+		turnCharacter (ego, EAST);
+	}
+	event verbExamine {
+		think (ego, "A wolf,");
+		think (ego, "er... woolf,");
+		think (ego, "wearing a dress. How curious.");
+	}
+	event verbPickUp {
+		think (ego, "I don't date anything outside my species.");
+	}
+	event verbTalkTo {
+		hideInterface ();
+		if (woolfCounter == 0) {
+			say (ego, "Hello, Mr. Wolf.");
+			say (woolf, "Woolf.");
+			think (ego, "Oh, so it talks.");
+			think (ego, "I don't know whether to be afraid or relieved about this.");
+			woolfCounter = 1;
+		}
+		loop {
+			if (woolfCounter == 1) addSpeechChoice ("Do you think you could let me through the door?", 1);
+			if (woolfCounter1 == 0) addSpeechChoice ("So, how'd you get stuck in this job?", 2);
+			if (woolfCounter2 == 0) addSpeechChoice ("Why do you wear a dress?", 3);
+			if (woolfCounter2 == 1) addSpeechChoice ("Can I have your roll of duct tape instead?", 4);
+			if (woolfCounter3 == 0) addSpeechChoice ("Why do you spell \"wolf\" with two O's?", 5);
+			addSpeechChoice ("Goodbye, Mr. Wolf.", 0);
+
+			var reply = getSpeechChoice (ego);
+			if (reply == 0) {
+				say (woolf, "Woolf!");
+				say (ego, "Whatever.");
+				showInterface ();
+				return;
+			} else if (reply == 1) {
+				say (woolf, "No.");
+				say (ego, "Please?");
+				if (buddyActivate) say (buddy, "Pretty please?");
+				say (woolf, "Well, maybe I'll let you through, if you do me a favour.");
+				say (ego, "What kind of favour?");
+				say (woolf, "I don't know. Whatever makes me happier than I am now.");
+				think (ego, "Well, that's a very vague statement.");
+				woolfCounter = 2;
+			} else if (reply == 2) {
+				say (woolf, "Well, you see, it's kind of a long story.");
+				say (woolf, "I once had a lifelong ambition of becoming a fearsome villain in a computer game.");
+				if (buddyActivate) say (buddy, "Me too! I wonder why I got picked to be the sidekick, instead.");
+				say (woolf, "My family's been in the villain business for generations,");
+				say (woolf, "why, my great-grandfather was the star of Little Red Riding Hood.");
+				say (ego, "Wow. That's fascinating.");
+				think (woolf, "*sigh*");
+				say (woolf, "But I'm just a big disappointment.");
+				say (woolf, "I haven't been able fulfill my dreams,");
+				say (woolf, "what with all these aliens, cyborgs, and zombies always being chosen over me.");
+				say (woolf, "People somehow think I'm a lot less fearsome because of the way I dress.");
+				think (ego, "Go figure.");
+				say (ego, "Yeah, that must be very disappointing.");
+				if (buddyActivate) say (buddy, "I know! It's terrible, isn't it?");
+				say (woolf, "So one day, Mallory H. Katz took pity on me and let me work in the testing room.");
+				say (ego, "Well, good for you, then.");
+				say (woolf, "Thanks, I think.");
+				woolfCounter1 = 1;
+			} else if (reply == 3) {
+				say (woolf, "This is a very sensitive issue for me, actually.");
+				say (woolf, "You see, I was raised in a family where our only sources of food");
+				say (woolf, "were old ladies who lived in small cottages in the forest.");
+				say (ego, "Uh-huh.");
+				if (buddyActivate) say (buddy, "Eww!");
+				say (woolf, "And as a result, the only clothing we could acquire were big poofy dresses.");
+				say (ego, "Makes sense.");
+				say (woolf, "But to be honest, I don't like it at all.");
+				say (woolf, "If it were up to me, I'd get myself some new clothes,");
+				say (woolf, "except I don't have enough money,");
+				say (woolf, "and I don't have the opposable thumbs to make my own clothing.");
+				say (ego, "What a pity.");
+				say (woolf, "I even asked Mallory H. Katz for some new clothes when I got this job.");
+				say (woolf, "And instead, she gave me a roll of duct tape.");
+				say (woolf, "I mean, what am I supposed to do, mummify myself?!");
+				say (ego, "Sure, if you like that sort of thing.");
+				say (woolf, "That was a rhetorical question, of course.");
+				say (ego, "I know.");
+				woolfCounter2 = 1;
+			} else if (reply == 4) {
+				say (woolf, "Sure.");
+				say (woolf, "It's not like I'm actually going to use it, anyway.");
+				showInterface ();
+				pause (10);
+				addToInventory (itemDuctTape);
+				pause (10);
+				hideInterface ();
+				woolfCounter2 = 2;
+			} else if (reply == 5) {
+				say (woolf, "Because it looks better that way.");
+				say (woolf, "Do you have a problem with that?");
+				say (ego, "Er... not really.");
+				say (ego, "It just seems kind of strange, that's all.");
+				say (woolf, "Strange, hmm?");
+				say (woolf, "Well, in Shakesperean times, people used to spell however they wanted.");
+				say (woolf, "You see, back then, it was completely normal.");
+				say (woolf, "But then after people made up a common way to spell things, it became strange.");
+				say (woolf, "Hmph!");
+				say (ego, "Well, I suppose that in some cases, it's still okay to spell however you want.");
+				say (ego, "Like on the Internet, for example.");
+				say (woolf, "Yes, the Internet r0x0r5. Pardon my 1337 5p33k.");
+				if (buddyActivate) {
+					say (buddy, "What?");
+					say (woolf, "Never mind.");
+				}
+				woolfCounter3 = 1;
+			}
+		}
+	}
+	event verbSmell {
+		defaultSmell ();
+		think (ego, "Just your average wet canine smell.");
+	}
+	event verbUse {
+		think (ego, "That would be cruel.");
+	}
+	event itemLazer {
+		say (speaker, "Now wait just one second!");
+		turnCharacter (ego, WEST);
+		pause (10);
+		say (speaker, "You're planning on shooting the woolf dead, now aren't you?");
+		if (buddyActivate) say (buddy, "What? No! Don't kill it!");
+		say (ego, "How did you know?");
+		say (speaker, "Don't pretend I didn't notice that fierce look in your eyes.");
+		say (speaker, "And you said it was morally wrong to kill... hmph!");
+		say (ego, "Okay, maybe I'm desperate.");
+		say (speaker, "Well, anyway, I'm going to save you some unnecessary distress,");
+		say (speaker, "and tell you that if you kill the woolf,");
+		say (speaker, "you will never be able to make your way past the door.");
+		think (ego, "Fair enough.");
+	}
+	event itemSausage {
+		say (ego, "Want a sausage?");
+		say (woolf, "Blecch! No thanks. I'm a vegetarian.");
+		say (woolf, "For me, eating meat conjures bad memories of when I used to eat old ladies.");
+		say (ego, "Ick. That's understandable.");
+	}
+	event itemHypnosisBook {
+		say (ego, "You are getting sleepy.");
+		say (woolf, "I am getting sleepy.");
+		say (ego, "Your eyelids are getting heavy.");
+		say (woolf, "My eyelids are getting heavy.");
+		say (ego, "You will open the door for me.");
+		say (woolf, "I will open the... HEY!");
+		say (woolf, "Your silly mind tricks won't work on me!");
+	}
+	event itemPoetryBook {
+		say (ego, "If I read you some nice poetry, would you let me through the door?");
+		if (buddyActivate) say (buddy, "It's really good poetry!");
+		say (woolf, "Is it a collection of haiku?");
+		say (ego, "Er... no. I don't think Wilfred Shakenbake wrote any haiku.");
+		say (woolf, "Then, no.");
+		say (ego, "Fair enough.");
+	}
+	event itemDuctTape {
+		say (ego, "I highly doubt that giving it back to him will help things.");
+	}
+	event itemDuctTapeTux {
+		say (woolf, "Say, is that a duct tape tuxedo?");
+		say (ego, "Why yes it is. And I made it myself, too!");
+		say (woolf, "Well, that certainly would look better on me than this ugly pink dress!");
+		say (woolf, "I'm going to try it on now. Don't peek.");
+		moveCharacter (ego, 500,309);
+		turnCharacter (ego, EAST);
+		if (buddyActivate) buddyMove ();
+		pause (10);
+		say (woolf, "I said, DON'T PEEK!");
+		turnCharacter (ego, WEST);
+		pause (20);
+		var w = anim ('test/woolf.duc', 4);
+		var wT = anim ('test/woolf.duc', 4, 5, 6, 7, 6, 5);
+		setCostume (woolf, costume (w,w,wT));
+		say (woolf, "Okay, you can peek now.");
+		callEvent (walkToPerson, woolf);
+		if (buddyActivate) buddyMove ();
+		pause (10);
+		say (woolf, "So what do you think? Don't I look snazzy or what?");
+		say (ego, "I think you look wonderful, actually.");
+		if (buddyActivate) say (buddy, "Yeah. You look great!");
+		say (woolf, "Well, thank you ever so much. How can I ever repay you?");
+		say (ego, "Hmm... why don't you open the door for me?");
+		say (woolf, "Er... okay.");
+		playSound ('noise/bigdoor.wav');
+		pause (animate (testDoor, anim ('test/doors.duc', 1,2,3,4,5,6,7,8)));
+		removeCharacter (testDoor);
+		pause (10);
+		say (woolf, "There, it's open.");
+		say (ego, "Excellent. Goodbye, Mr. Wolf!");
+		say (woolf, "For the last time, it's WOOLF!");
+		say (ego, "Right.");
+		if (buddyActivate) {
+			turnCharacter (ego, WEST);
+			say (ego, "Bye, Bolton!");
+			say (buddy, "Bye, Gert!");
+			say (buddy, "See you in \"The Game That Takes Place on a Cruise Ship\"!");
+		}
+		forceCharacter (ego, 975,291);
+		stopSound ('noise/elevator.ogg');
+		gotoRoom (employmentRoom);
+	}
+}
+
+objectType books ("books") {
+	event walkToPerson {
+		moveCharacter (ego, 171,306);
+		turnCharacter (ego, NORTH);
+	}
+	event verbExamine {
+		think (ego, "These books sure look interesting. Let's see, we have...");
+		think (ego, "\"Fun with Hypnosis\",");
+		think (ego, "\"Poetic Reflections by Wilfred Shakenbake\",");
+		think (ego, "\"Teleportation for Twits\",");
+		think (ego, "and \"How to make a Duct Tape Tuxedo\".");
+		pause (10);
+		think (ego, "Very interesting indeed.");
+	}
+	event verbPickUp {
+		think (ego, "Hmm...");
+		think (ego, "Let's see what these books have to say about getting out of here.");
+		addToInventory (itemHypnosisBook);
+		addToInventory (itemPoetryBook);
+		addToInventory (itemTeleportationBook);
+		addToInventory (itemDuctTapeBook);
+		removeCharacter (books);
+	}
+	event verbSmell {
+		defaultSmell ();
+		think (ego, "Ah, the lovely smell of aging paper!");
+	}
+	event verbUse {
+		callEvent (verbPickUp, books);
+	}
+}
+
+objectType sausage ("sausage") {
+	event walkToPerson {
+		callEvent (walkToPerson, books);
+	}
+	event verbExamine {
+		callEvent (verbExamine, itemSausage);
+	}
+	event verbPickUp {
+		think (ego, "Ooh, this sausage looks lovely.");
+		addToInventory (itemSausage);
+		removeCharacter (sausage);
+	}
+	event verbSmell {
+		callEvent (verbSmell, itemSausage);
+	}
+	event verbUse {
+		callEvent (verbPickUp, sausage);
+	}
+	event verbConsume {
+		callEvent (verbPickUp, sausage);
+		pause (10);
+		callEvent (verbConsume, itemSausage);
+	}
+}
+
+objectType lazer ("Lazer Gun") {
+	event walkToPerson {
+		moveCharacter (ego, 295,294);
+		turnCharacter (ego, WEST);
+	}
+	event verbExamine {
+		callEvent (verbExamine, itemLazer);
+	}
+	event verbPickUp {
+		think (ego, "Looks like this is going to have to be my very first time ever carrying a weapon.");
+		think (ego, "Urgh.");
+		addToInventory (itemLazer);
+		removeCharacter (lazer);
+	}
+	event verbUse {
+		callEvent (verbPickUp, lazer);
+	}
+}
+
+objectType painting ("painting") {
+	event verbExamine {
+		think (ego, "\"Big Bacterium is Watching You!\"");
+		think (ego, "That's always reassuring to know.");
+		if (buddyActivate) {
+			say (buddy, "Isn't that painting creepy or what?");
+			say (ego, "Very creepy, indeed.");
+		}
+	}
+	event verbPickUp {
+		think (ego, "As wonderful as it would be to have Big Bacterium with me at all times,");
+		think (ego, "I think I'll respectfully decline.");
+	}
+	event verbSmell {
+		defaultSmell ();
+		think (ego, "Mmm... paint.");
+	}
+	event itemLazer {
+		think (ego, "As scary as Big Bacterium looks,");
+		think (ego, "something tells me that I shouldn't vandalize that.");
+	}
+}
+
+objectType testDoor ("") {
+}

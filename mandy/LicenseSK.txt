@@ -1,0 +1,20 @@
+Mandy Vianoèná adventúra 1.4
+
+Copyright © 2003-2006 Rudolf Šlavka, Marián Mifkoviè.
+
+Táto hra je FREEWARE, môete ju vo¾ne kopírova a zdie¾a, ale nesmie vám z nej plynú zisk.
+
+Ak chcete publikova túto hru na vašej internetovej stránke, musíte nám poskytnú štatistiku stiahnutí.
+Túto hru môete publikova na CD/DVD prílohe PC alebo herného magazínu len ak pošlete autorom jeden kompletnı vıtlaèok.
+Autori nenesú zodpovednos za prípadné škody spôsobené uívaním programu ani za pripojené pozdravy.
+
+Kontakt:
+games@aquindesign.com
+www.aquindesign.com
+
+SLUDGE - Copyright © 2000-2002 Hungry Software
+7-Zip - Copyright © 1999-2003 Igor Pavlov
+NSIS - Copyright © 1999-2003 Nullsoft, Inc.
+BASS - Copyright © 1999-2005 Un4seen Developments
+
+[23.10.2006]

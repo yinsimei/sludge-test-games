@@ -1,0 +1,131 @@
+# This is the character that follows the main character around, and a bunch of functions
+# associated with it. Yeah.
+
+var smelledBolton = FALSE;
+var talkedBolton = FALSE;
+objectType buddy ("Bolton") {
+	speechColour 128, 0, 255;
+	event verbExamine {
+		think (ego, "I just love his physics-defying crown.");
+		think (ego, "And those pants!");
+	}
+	event verbPickUp {
+		think (ego, "No need for that! He must already like me enough to follow me everywhere...");
+	}
+	event verbTalkTo {
+		faceBuddy ();
+		say (ego, "Bolton?");
+		say (buddy, "Yeah?");
+		if (talkedBolton) {
+			say (ego, "Just wanted to make sure you're still there for me.");
+			say (buddy, "Well, that's my job.");
+		} else {
+			say (ego, "How do you suppose I could get out of this room?");
+			say (buddy, "Well, the only way out seems to be that big grey door.");
+			say (ego, "I knew that!");
+			say (buddy, "Anyway, I think that woolf over there might have something to do with it.");
+			say (buddy, "Why don't you try bribing him or something? That always works.");
+			say (ego, "Thanks, I'll keep that in mind.");
+			talkedBolton = TRUE;
+		}
+	}
+	event verbSmell {
+		faceBuddy ();
+		defaultSmell ();
+		if (smelledBolton) {
+			think (ego, "He smells like fabric softener.");
+		} else {
+			say (ego, "Say, Bolton, what's that cologne you're wearing?");
+			say (buddy, "Oh, that's just fabric softener.");
+			say (ego, "I have to admit, that's some pretty good-smelling fabric softener.");
+			say (ego, "I want some!");
+			say (buddy, "I think it's only available in Nanonesia.");
+			say (ego, "Oh well.");
+			smelledBolton = TRUE;
+		}
+	}
+	event verbUse {
+		think (ego, "I'm already sort of using him. Does that count?");
+	}
+	event itemLazer {
+		think (ego, "I can't kill him! That would be counterproductive.");
+	}
+	event itemSausage {
+		faceBuddy ();
+		say (ego, "Want some sausage?");
+		say (buddy, "Sure.");
+		removeFromInventory (itemSausage);
+		think (buddy, "*munch munch*", 'noise/eat.wav');
+		say (buddy, "That sure was some good sausage!");
+	}
+	event itemHypnosisBook {
+		faceBuddy ();
+		say (buddy, "Ooh, are you going to hypnotise me?");
+		say (buddy, "Make me do something really silly, like dance the Macarena with my pants on my head!");
+		say (ego, "On second thought, I REALLY should focus on getting out of here.");
+		say (buddy, "Right.");
+	}
+	event itemPoetryBook {
+		faceBuddy ();
+		say (ego, "\"Shall I compare thee to a dancing fish?\"");
+		say (ego, "\"Thou art more scaly and more vigourous.\"");
+		say (buddy, "I love that poem! It's one of my favourites.");
+		say (ego, "Really? Mine too. We have so much in common!");
+	}
+	event itemDuctTapeTux {
+		faceBuddy ();
+		say (buddy, "Thanks, but I like my own clothes better.");
+	}
+}
+
+var buddyActivate = FALSE;
+
+sub makeBuddyAnim () {
+	return costume (
+		# STANDING STILL...
+		anim ('ego/bolton.duc', 0),
+		anim ('ego/bolton.duc', -2),
+		anim ('ego/bolton.duc', 1),
+		anim ('ego/bolton.duc', 2),
+		# WALKING...
+		anim ('ego/bolton.duc', 3,4,5,6,7,8,9,10,11,12,13,14),
+		anim ('ego/bolton.duc', -27,-28,-29,-30,-31,-32,-33,-34,-35,-36,-37,-38),
+		anim ('ego/bolton.duc', 15,16,17,18,19,20,21,22,23,24,25,26),
+		anim ('ego/bolton.duc', 27,28,29,30,31,32,33,34,35,36,37,38),
+		# TALKING...
+		anim ('ego/bolton.duc', 0,39,40,39,0,41,42,41),
+		anim ('ego/bolton.duc', -2,-43,-44,-43,-2,-45,-46,-45),
+		anim ('ego/bolton.duc', 1),
+		anim ('ego/bolton.duc', 2,43,44,43,2,45,46,45)
+	)
+}
+
+# Moves the buddy character (invoked by leftClick in interface.slu)
+sub buddyMove () {
+	if (isCharacter (buddy)) {
+		var a = getObjectX (ego) - getObjectX (buddy);
+		if (a >= 0) {
+			moveCharacter (buddy, getObjectX (ego) - 75, getObjectY (ego));
+			turnCharacter (buddy, EAST);
+		} else if (a < 0) {
+			moveCharacter (buddy, getObjectX (ego) + 75, getObjectY (ego));
+			turnCharacter (buddy, WEST);
+		}
+	}
+}
+
+sub startBuddyMove () {
+	if (isCharacter (buddy)) {
+		loop {
+			var a = getObjectX (ego) - getObjectX (buddy);
+			if (a > 150 || a < -150) buddyMove ();
+			pause (1);
+		}
+	}
+}
+
+sub faceBuddy () {
+	var a = getObjectX (ego) - getObjectX (buddy);
+	if (a >= 0) turnCharacter (ego, WEST);
+	else if (a < 0) turnCharacter (ego, EAST);
+}

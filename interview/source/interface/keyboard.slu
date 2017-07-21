@@ -1,0 +1,26 @@
+sub keys (k) {
+	if (k == "ESCAPE") {
+		if (cutscenePlaying == TRUE) {
+			cancelSub (cutsceneStart);
+			cutscenePlaying = FALSE;
+			cutsceneStop ();
+			go ();
+		} else {
+			menu ();
+		}
+	}
+	if (k == "s") {
+		var result = saveGame("quicksave.sav");
+		if (result) {
+			saveLoadMessage ("save");
+		} else {
+			saveLoadMessage ("load");
+		}
+	}
+	if (k == "l") {
+		if (fileExists ("quicksave.sav")) {
+			loadGame ("quicksave.sav");
+		}
+	}
+	if (k == "q") quitThisGame ();
+}

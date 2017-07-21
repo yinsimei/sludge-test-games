@@ -1,0 +1,274 @@
+var inventory = newStack ();
+var invDisplay;
+var icon;
+var invStart = 0;
+var invUp;
+var invDown;
+
+sub initInventory () {
+	invUp = FALSE;
+	invDown = FALSE;
+	invDisplay = copyStack (inventory);
+	# We can only have 8 inventory items on the screen at any given time,
+	# so if there are more than 8, we must delete them accordingly
+	var invSize = stackSize (inventory);
+	if (invSize > 8) {
+		# If the starting point is greater than zero
+		if (invStart > 0) {
+			# Activate the up arrow
+			invUp = TRUE;
+			# Remove the items before the starting point
+			for (var x = 0; x < invStart; x++) {
+				popFromStack (invDisplay);
+			}
+		}
+		# If we've still got leftover items at the bottom
+		var invSize2 = stackSize (invDisplay);
+		if (invSize2 > 8) {
+			# Activate the down arrow
+			invDown = TRUE;
+			# Remove all extra items at the end
+			for (var y = invSize2; y >= 8; y--) {
+				var a = invDisplay [y];
+				deleteFromStack (invDisplay, a);
+			}
+		}
+	}
+}
+
+# Show the inventory
+sub showInventory () {
+	initInventory ();
+	# Go through every visible inventory item, and place it on the screen
+	var x = 433;
+	var y = 380;
+	while (invDisplay) {
+		if (x > 610) {
+			y += 58;
+			x = 433;
+		}
+		var thisItem = popFromStack (invDisplay);
+		callEvent (getIcon, thisItem);
+		addCharacter (thisItem, x, y, icon);
+		setCharacterExtra (thisItem, ICON + RECTANGULAR);
+		setCharacterAntiAliasing (thisItem, FALSE, 0, 0);
+		x += 58;
+	}
+
+	# Show the up/down arrows, if needed
+	if (invUp == TRUE) {
+		addCharacter (upArrow, 380, 382, anim ('interface/interface.duc', 2));
+		setCharacterExtra (upArrow, ICON);
+		setCharacterAntiAliasing (upArrow, FALSE, 0, 0);
+		addScreenRegion (upArrow, 372+offset, 365, 388+offset, 399, 0, 0, -1);
+	}
+	if (invDown == TRUE) {
+		addCharacter (downArrow, 380, 442, anim ('interface/interface.duc', 3));
+		setCharacterExtra (downArrow, ICON);
+		setCharacterAntiAliasing (downArrow, FALSE, 0, 0);
+		addScreenRegion (downArrow, 372+offset, 425, 388+offset, 459, 0, 0, -1);
+	}
+}
+
+# Hide the inventory
+sub hideInventory () {
+	initInventory ();
+	while (invDisplay) {
+		var thisItem = popFromStack (invDisplay);
+		removeCharacter (thisItem);
+		removeScreenRegion (thisItem);
+	}
+
+	removeCharacter (upArrow);
+	removeCharacter (downArrow);
+}
+
+# Add an item to the inventory
+sub addToInventory (item) {
+	hideInventory ();
+	pushToStack (inventory, item);
+	showInventory ();
+}
+
+# Remove an inventory item
+sub removeFromInventory (item) {
+	hideInventory ();
+	deleteFromStack (inventory, item);
+	showInventory ();
+}
+
+# The up and down arrows scroll every four items, since every row can have four items in it
+objectType upArrow ("") {
+	event oneAction {
+		hideInventory ();
+		invStart -= 4;
+		showInventory ();
+	}
+}
+
+objectType downArrow ("") {
+	event oneAction {
+		hideInterface ();
+		invStart += 4;
+		showInterface ();
+	}
+}
+
+objectType getIcon ("") {
+}
+
+objectType itemLazer ("lazer gun") {
+	event getIcon {
+		icon = anim ('interface/inventory.duc', 0);
+	}
+	event verbExamine {
+		think (ego, "It's a lazer gun.");
+		think (ego, "Yes, \"lazer\" is intentionally misspelled.");
+	}
+	event default {
+		think (ego, "Blowing that to bits would be stupid and pointless.");
+	}
+}
+
+objectType itemSausage ("sausage") {
+	event getIcon {
+		icon = anim ('interface/inventory.duc', 1);
+	}
+	event verbExamine {
+		think (ego, "What a wonderfully juicy sausage.");
+	}
+	event verbSmell {
+		defaultSmell ();
+		think (ego, "Mmm, that sausage sure smells good.");
+	}
+	event verbConsume {
+		removeFromInventory (itemSausage);
+		think (ego, "*munch munch*", 'noise/eat.wav');
+		pause (10);
+		think (ego, "That was tasty.");
+	}
+	event default {
+		think (ego, "I don't think my sausage will be put to good use with that.");
+	}
+}
+
+objectType itemHypnosisBook ("hypnosis book") {
+	event getIcon {
+		icon = anim ('interface/inventory.duc', 2);
+	}
+	event verbExamine {
+		think (ego, "\"Fun with Hypnosis\"");
+		think (ego, "It tells you how to hypnotise people.");
+		think (ego, "How fascinating.");
+	}
+	event verbSmell {
+		callEvent (verbSmell, books);
+	}
+	event default {
+		think (ego, "That doesn't look like it can be hypnotised.");
+	}
+}
+
+objectType itemPoetryBook ("poetry book") {
+	event getIcon {
+		icon = anim ('interface/inventory.duc', 3);
+	}
+	event verbExamine {
+		think (ego, "\"Poetic Reflections by Wilfred Shakenbake\"");
+		think (ego, "I studied this book in my \"Dead Poets 314\" class.");
+		think (ego, "A rather boring combination of 16th century pentameteorology,");
+		think (ego, "as well as hormonal angst and discussions of quantum mechanics.");
+	}
+	event verbSmell {
+		callEvent (verbSmell, books);
+	}
+	event default {
+		say (ego, "\"Shall I compare thee to a dancing fish?\"");
+		pause (10);
+		think (ego, "No response. Am I supposed to feel disappointment?");
+	}
+}
+
+objectType itemTeleportationBook ("teleportation book") {
+	event getIcon {
+		icon = anim ('interface/inventory.duc', 4);
+	}
+	event verbExamine {
+		think (ego, "\"Teleportation for Twits\"");
+		think (ego, "It says:");
+		think (ego, "\"To move to a neighbouring room, click your heels together,");
+		think (ego, "and say 'There's no place like home' three times.\"");
+		think (ego, "Hogwash. Just as I thought!");
+	}
+	event verbSmell {
+		callEvent (verbSmell, books);
+	}
+	event default {
+		think (ego, "Somehow, I doubt that combining this book with anything will make it work.");
+	}
+}
+
+objectType itemDuctTapeBook ("duct tape book") {
+	event getIcon {
+		icon = anim ('interface/inventory.duc', 5);
+	}
+	event verbExamine {
+		think (ego, "\"How to make a Duct Tape Tuxedo\"");
+		think (ego, "Wow, the designs in this sure are intricate!");
+	}
+	event verbSmell {
+		callEvent (verbSmell, books);
+	}
+	event itemDuctTape {
+		callEvent (itemDuctTapeBook, itemDuctTape);
+	}
+	event default {
+		think (ego, "I don't think this'll be useful with anything except duct tape.");
+	}
+}
+
+objectType itemDuctTape ("roll of duct tape") {
+	event getIcon {
+		icon = anim ('interface/inventory.duc', 6);
+	}
+	event verbExamine {
+		think (ego, "Just a boring roll of duct tape.");
+	}
+	event itemDuctTapeBook {
+		turnCharacter (ego, SOUTH);
+		think (ego, "Okay, so I've got a roll of duct tape.");
+		think (ego, "and a book of patterns on how to make a duct tape tuxedo.");
+		think (ego, "Therefore, I shall attempt to make a tuxedo out of duct tape.");
+		freeze ();
+		darkBackground();
+		setPasteColour (255, 255, 255);
+		pasteString (CENTRE, 245, "Quite a while later...");
+		pause (20);
+		unfreeze ();
+		removeFromInventory (itemDuctTape);
+		addToInventory (itemDuctTapeTux);
+		think (ego, "There, it's done.");
+		think (ego, "Oh, I make myself so proud!");
+		if (buddyActivate) {
+			say (buddy, "A duct-tape tuxedo? Cool!");
+			say (ego, "Thanks.");
+			say (buddy, "Anytime.");
+		}
+	}
+	event default {
+		think (ego, "Considering that I'm not Red Green,");
+		think (ego, "I can't even begin to think of a useful way to duct-tape that.");
+	}
+}
+
+objectType itemDuctTapeTux ("duct tape tuxedo") {
+	event getIcon {
+		icon = anim ('interface/inventory.duc', 7);
+	}
+	event verbExamine {
+		think (ego, "A duct tape tuxedo that I made all by myself!");
+	}
+	event default {
+		think (ego, "The tuxedo won't fit that.");
+	}
+}
